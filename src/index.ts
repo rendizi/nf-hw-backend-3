@@ -3,6 +3,7 @@ import express from 'express';
 import { logger } from './logger';
 import fetchDevPosts, {StructuredData} from "./fetch";
 import cron from "node-cron";
+import {AnalysisResult, analyzeData} from "./analyze";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,26 +11,33 @@ const PORT = process.env.PORT || 3000;
 app.use(logger);
 app.use(express.json());
 
-let data: StructuredData[] = [];
+let data: AnalysisResult;
+let fetchData: StructuredData[]
 
-cron.schedule('*/5 * * * * *', async () => {
-  console.log('Running fetchData every 5 seconds');
+cron.schedule('0 */6 * * *', async () => {
+  console.log('Running fetchData every 6 hours');
   try {
     const newData = await fetchDevPosts();
-    data = newData;
+    data = analyzeData(newData);
+    fetchData = newData
   } catch (error) {
     console.error('Error fetching data via cron job:', error);
   }
 });
 
 app.get('/devto/data', (req, res) => {
-  res.status(200).json(data);
+  res.status(200).json(fetchData);
+});
+
+app.get('/devto/analyze', (req, res) => {
+    res.status(200).json(data);
 });
 
 app.listen(PORT, () => {
   fetchDevPosts()
       .then(posts => {
-        data = posts;
+        data = analyzeData(posts);
+        fetchData = posts
       })
       .catch(error => {
         console.error('Error fetching data on server start:', error);

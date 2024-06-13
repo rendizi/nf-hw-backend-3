@@ -5,7 +5,7 @@ export interface StructuredData {
     author: string;
     title: string;
     tags: string[];
-    reactions: string;
+    reactions: number; // Change type to number
     date: string;
 }
 
@@ -38,10 +38,12 @@ const fetchDevPosts = async (): Promise<StructuredData[]> => {
                 tags.push(tag);
             });
 
-            const reactions = $(element)
+            // Parse reactions count to integer
+            const reactionsText = $(element)
                 .find(".aggregate_reactions_counter")
                 .text()
                 .trim();
+            const reactions = parseInt(reactionsText.split(" ")[0]); // Extract number and convert to integer
 
             const date = $(element)
                 .find(".crayons-story__tertiary")
