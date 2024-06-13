@@ -6,7 +6,7 @@ import cron from "node-cron";
 import {AnalysisResult, analyzeData} from "./analyze";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 app.use(logger);
 app.use(express.json());
